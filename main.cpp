@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<string.h>
+#include<stdbool.h>
 #include<windows.h>
 #include<stdlib.h>
 #include<conio2.h>
@@ -17,7 +18,8 @@
 	{
 		int codF;
 		char nomeF[35];
-		char Cidade[35];	
+		char Cidade[35];
+		bool statuts;	
 	};
 	
 	struct Produtos
@@ -27,6 +29,7 @@
 		float preco;
 		struct Datav DTV;
 		int codF;
+		bool statuts;
 	};
 	
 	struct Cliente
@@ -34,6 +37,7 @@
 		char CPF[15];
 		char nomeC[35];
 		int qtdC;
+		bool status;
 		float valor;	
 	};
 	
@@ -42,6 +46,7 @@
 		int codV;
 		char CPF[35];
 		struct Datav DTV;
+		bool status; 
 		float total;
 	};
 	
@@ -52,22 +57,6 @@
 		int qtde;
 		float valorU;	
 	};
-
-/*Auxiliares de interface*/
-void msg()
-{
-	limparMsg ();
-	gotoxy(24,5);
-	textcolor(10);
-}
-
-void txt(int linha)
-{
-	textcolor(15);
-	gotoxy(8,linha);
-	fflush(stdin);
-}
-
 /*Funções de limpeza*/
 
 void limparMenu ()
@@ -124,6 +113,21 @@ void limparTelaAnyway ()
 	   		printf("%c",32);
 	   		}
 }
+/*Auxiliares de interface*/
+void msg()
+{
+	limparMsg ();
+	gotoxy(24,5);
+	textcolor(10);
+}
+
+void txt(int linha)
+{
+	textcolor(15);
+	gotoxy(8,linha);
+	fflush(stdin);
+}
+
 
 /*Todos os menus*/
 char menu ()
@@ -291,64 +295,183 @@ char menu7 ()
 }
 
 /*Buscas*/
-int BuscaCodF(struct Fornecedor F[TF], int TL,int cod)
+/*
+int BuscaMat(FILE *Ptr,int Mat)
 {
-	int i=0;
+	TpFunc R;
+	rewind(Ptr);
+	fread(&R,sizeof(TpFunc),1,Ptr);
+	while (!feof(Ptr) && Mat!=R.Matricula)
+		fread(&R,sizeof(TpFunc),1,Ptr);
 	
-	while(i<TL && cod!=F[i].codF)
-	i++;
-	if(i<TL)
-	 return i;
+	if (!feof(Ptr))
+		return ftell(Ptr)-sizeof(TpFunc);
 	else
-	 return -1;
-}
+		return -1;
+}*/
 	
-/*Cadastros*/
-void cad_forn(struct Fornecedor F)
+/*	
+void ExcLogica(void)
 {
-	int linhaC=11,i;
+	int pos;
+		TpFunc Reg;
+		FILE *PtrFunc = fopen("func.dat","rb+");
+		printf("\n### Exclusao Logica de Funcionarios ###\n");
+		if (PtrFunc == NULL)
+			printf("\nErro de Abertura!\n");
+		else
+			{
+				printf("\nMatricula do Funcionario a alterar: ");
+				scanf("%d",&Reg.Matricula);
+				while (Reg.Matricula>0)
+				{
+					pos = BuscaMat(PtrFunc,Reg.Matricula);
+					
+					if (pos==-1)
+						printf("\nMatricula nao encontrada!\n");
+					else
+						{   
+							fseek(PtrFunc,pos,0);
+							fread(&Reg,sizeof(TpFunc),1,PtrFunc);
+							printf("\n*** Detalhes do Registro ***\n");
+							printf("Matricula: %d\n",Reg.Matricula);
+							printf("Nome: %s\n",Reg.Nome);
+							printf("Salario: R$ %.f\n",Reg.Salario);
+							
+							printf("\nConfirma Exclusao Logica (S/N)? ");
+							if (toupper(getche())=='S')
+							{
+								printf("\nNova Matricula: "); fflush(stdin);
+								scanf("%d",&Reg.Matricula);
+								printf("\nNovo Nome: "); fflush(stdin);
+								gets(Reg.Nome);
+								printf("\nSalario: R$ ");
+								scanf("%f",&Reg.Salario);
+								Reg.Status = 'I';
+								fseek(PtrFunc,pos,0);
+								fwrite(&Reg,sizeof(TpFunc),1,PtrFunc);
+								printf("\nRegistro atualizado!!\n");
+							}
+						}
+					getch();
+					
+					printf("\nMatricula do Funcionario a alterar: ");
+					scanf("%d",&Reg.Matricula);
+				}	
+				fclose(PtrFunc);
+			}
+}
+*/
+
+/*
+void ExclFisica(void){
+	int pos, Mat;
+	char op;
+	TpFunc Reg;
+	FILE *PtrFunc = fopen("func.dat","rb");
+	printf("\n### Exclusao Fisica de Funcionarios ###\n");
+	if (PtrFunc == NULL)
+		printf("\nErro de Abertura!\n");
+	else
+		{
+			printf("\nMatricula do Funcionario a excluir: ");
+			scanf("%d",&Mat);
+			if (Mat>0)
+			{
+				pos = BuscaMat(PtrFunc,Mat);
+				
+				if (pos==-1)
+					printf("\nMatricula nao encontrada!\n");
+				else
+					{   
+						fseek(PtrFunc,pos,0);
+						fread(&Reg,sizeof(TpFunc),1,PtrFunc);
+						printf("\n*** Detalhes do Registro ***\n");
+						printf("Matricula: %d\n",Reg.Matricula);
+						printf("Nome: %s\n",Reg.Nome);
+						printf("Salario: R$ %.f\n",Reg.Salario);
+						
+						printf("\nConfirma exclusao (S/N)? ");
+						op = toupper(getche());
+						if (op=='S')
+						{
+							FILE *PtrTemp = fopen("Temp.dat", "wb");
+							rewind(PtrFunc);
+							fread(&Reg,sizeof(TpFunc),1,PtrFunc);
+							while(!feof(PtrFunc)){
+								if(Reg.Matricula != Mat)
+									fwrite(&Reg,sizeof(TpFunc),1,PtrTemp);
+									
+							}
+							fclose(PtrFunc);
+							fclose(PtrTemp);
+							remove("Func.dat");
+							rename("Temp.dat","Func.dat");
+							
+							printf("\nRegistro deletado!!\n");
+						}
+						else
+							fclose(PtrFunc);
+					}
+				getch();
+								
+			}
+		}
+}
+*/
+
+/*Cadastros*/
+void cad_forn()
+{
+	struct Fornecedor F;
+	int linhaC=11,qtd,aux;
 	
 	msg();
 	printf("Quantos fornecedores deseja cadastrar?");
 	txt(linhaC);
-	scanf("%d",&i);
+	scanf("%d",&qtd);
 	linhaC++;
-	if(i<=0)
+	if(qtd<=0)
 	return;
 	else
 	{
-		FILE *frn = fopen("fornecedores.dat","ab");
+		FILE *frn = fopen("fornecedores.dat","ab+");
 		if(frn==NULL)
 		{
 			msg();
-			printf("ERRO ERRO ERRO HAHAHA");
+			printf("--[ARQUIVO INVALIDO]--");
 			getch();	
-			return;
+			exit(1);
 		}
 		else
 		{
-			for(j=0;j<i;j++)
+			for(int i=0;i<qtd;i++)
 			{
-				txt(linhaC);
+				msg();
 				printf("Digite o codigo do fornecedor: ");
-				scanf("%d",&F.codF);
+				txt(linhaC);
+				scanf("%d",&aux);
 				linhaC++;
 				if(cod<=0)
 				{
 					msg();
-					printf("TA MALUCO HAHAHA");
+					printf("***Codigo Invalido!***");
 					getch();	
 					return;
 				}
 				else if(cod>=1)
 				{
+					fwrite(&F,sizeof(F),1,FILE*ptr); 
 					
+					status = true;
 				}
 				printf("Digite o nome do fornecedor: ");
 				printf("Digite a cidade do fornecedor: ");
 			}
 		}
 	}
+	msg();
+	printf("**Cadastro Finalizado**");
 	
 }
 
