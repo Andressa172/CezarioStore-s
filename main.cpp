@@ -57,6 +57,7 @@
 		int qtde;
 		float valorU;	
 	};
+	
 /*Funções de limpeza*/
 
 void limparMenu ()
@@ -311,57 +312,63 @@ int BuscaMat(FILE *Ptr,int Mat)
 }*/
 	
 /*	
-void ExcLogica(void)
-{
-	int pos;
-		TpFunc Reg;
-		FILE *PtrFunc = fopen("func.dat","rb+");
-		printf("\n### Exclusao Logica de Funcionarios ###\n");
-		if (PtrFunc == NULL)
-			printf("\nErro de Abertura!\n");
-		else
-			{
-				printf("\nMatricula do Funcionario a alterar: ");
-				scanf("%d",&Reg.Matricula);
-				while (Reg.Matricula>0)
-				{
-					pos = BuscaMat(PtrFunc,Reg.Matricula);
-					
-					if (pos==-1)
-						printf("\nMatricula nao encontrada!\n");
-					else
-						{   
-							fseek(PtrFunc,pos,0);
-							fread(&Reg,sizeof(TpFunc),1,PtrFunc);
-							printf("\n*** Detalhes do Registro ***\n");
-							printf("Matricula: %d\n",Reg.Matricula);
-							printf("Nome: %s\n",Reg.Nome);
-							printf("Salario: R$ %.f\n",Reg.Salario);
-							
-							printf("\nConfirma Exclusao Logica (S/N)? ");
-							if (toupper(getche())=='S')
-							{
-								printf("\nNova Matricula: "); fflush(stdin);
-								scanf("%d",&Reg.Matricula);
-								printf("\nNovo Nome: "); fflush(stdin);
-								gets(Reg.Nome);
-								printf("\nSalario: R$ ");
-								scanf("%f",&Reg.Salario);
-								Reg.Status = 'I';
-								fseek(PtrFunc,pos,0);
-								fwrite(&Reg,sizeof(TpFunc),1,PtrFunc);
-								printf("\nRegistro atualizado!!\n");
-							}
-						}
-					getch();
-					
-					printf("\nMatricula do Funcionario a alterar: ");
-					scanf("%d",&Reg.Matricula);
-				}	
-				fclose(PtrFunc);
-			}
+void ExcLogicaForn(void) {
+    int pos;
+    struct Fornecedor fornecedor; //fodase coloquei mesmo uma struct aqui porra para testar mano porra 
+    FILE *ptrForn = fopen("fornecedores.dat", "rb+");
+
+    printf("\n### Exclusao Logica de Fornecedor ###\n");
+
+    if (ptrForn == NULL) {
+        printf("\nErro de Abertura!\n");
+    } else {
+        printf("\nCodigo do Fornecedor a excluir: ");
+        scanf("%d", &fornecedor.codF);
+
+        while (fornecedor.codF > 0) {
+            pos = BuscaCodFornecedor(ptrForn, fornecedor.codF);
+
+            if (pos == -1) {
+                printf("Codigo nao encontrado!\n");
+            } else {
+                fseek(ptrForn, pos, 0);
+                fread(&fornecedor, sizeof(struct Fornecedor), 1, ptrForn);
+
+                printf("\n*** Detalhes do Registro ***\n");
+                printf("Codigo Fornecedor: %d\n", fornecedor.codF);
+                printf("Nome Fornecedor: %s\n", fornecedor.nomeF);
+                printf("Cidade Fornecedor: %s\n", fornecedor.Cidade);
+
+                printf("\nConfirma Exclusao Logica (S/N)? ");
+                if (toupper(getchar()) == 'S') {
+                    printf("\nNovo Codigo Fornecedor: ");
+                    scanf("%d", &fornecedor.codF);
+                    printf("\nNovo Nome Fornecedor: ");
+                    scanf("%s", fornecedor.nomeF);
+                    printf("\nCidade Fornecedor: ");
+                    scanf("%s", fornecedor.Cidade);
+                    fornecedor.status = false;
+
+                    fseek(ptrForn, pos, 0);
+                    fwrite(&fornecedor, sizeof(struct Fornecedor), 1, ptrForn);
+                    printf("\nRegistro atualizado!!\n");
+                }
+            }
+
+            printf("\nCodigo do Fornecedor a excluir: ");
+            scanf("%d", &fornecedor.codF);
+        }
+
+        fclose(ptrForn);
+    }
 }
 */
+
+
+
+// fazer aqui uma BuscaCodFornecedor(FILE *ptrForn, int codF)
+
+
 
 /*
 void ExclFisica(void){
@@ -459,7 +466,7 @@ void cad_forn()
 					getch();	
 					return;
 				}
-				else if(cod>=1)
+				else
 				{
 					fwrite(&F,sizeof(F),1,FILE*ptr); 
 					
