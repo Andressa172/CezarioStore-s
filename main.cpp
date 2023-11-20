@@ -5,38 +5,34 @@
 #include<stdlib.h>
 #include<conio2.h>
 
-/*Declaração das structs*/
+/*DeclaraÃ§Ã£o das structs*/
 	struct Datav 
 	{
-    	int dia;
-    	int mes;
-    	int ano;
+    	int dia,mes,ano;
 	};
 
 
 	struct Fornecedor
 	{
-		int codF;
-		char nomeF[35];
-		char Cidade[35];
-		bool statuts;	
+		int codF,qtd=0;
+		char nomeF[35],Cidade[35];;
+		bool status;	
 	};
 	
 	struct Produtos
 	{
-		int codP,Estoque;
+		int codP,Estoque,codF,qtd=0;
 		char nomeP[35];	
 		float preco;
 		struct Datav DTV;
-		int codF;
-		bool statuts;
+		bool status;
 	};
 	
 	struct Cliente
 	{
 		char CPF[15];
 		char nomeC[35];
-		int qtdC;
+		int qtdC=0,qtd=0;
 		bool status;
 		float valor;	
 	};
@@ -52,19 +48,15 @@
 	
 	struct VendasProd
 	{
-		int codV;
-		int codP;
-		int qtde;
+		int codV,codP,qtde;
 		float valorU;	
 	};
 	
-/*Funções de limpeza*/
-
+/*FunÃ§Ãµes de limpeza*/
 void limparMenu ()
 {
 	int c,l;
 	
-	//Menu
 	for(c=51;c<78;c++)
 	 for(l=10;l<24;l++)
 	 {
@@ -73,11 +65,10 @@ void limparMenu ()
 	 }	
 }
 
-void limparTela (int &linhaC)
+void limpartela (int &linhaC)
 {	
 	int c,l;
 	
-	//Código
 	if(linhaC>=23)
 	{
 		linhaC=12;
@@ -94,7 +85,6 @@ void limparMsg ()
 {
 	int c=5,l=5;
 	
-		 //Mensagem
 	 	 for(c=5;c<77;c++)
 	   		{
 	   		gotoxy(c,l);
@@ -102,11 +92,10 @@ void limparMsg ()
 	   		}
 }
 
-void limparTelaAnyway ()
+void limpartelaanyway ()
 {
 	int c,l;
 	
-	//Código COMPLETO
 	for(c=3;c<48;c++)
 	 	 for(l=9;l<23;l++)
 	   		{
@@ -114,19 +103,21 @@ void limparTelaAnyway ()
 	   		printf("%c",32);
 	   		}
 }
+
 /*Auxiliares de interface*/
 void msg()
 {
 	limparMsg ();
-	gotoxy(24,5);
+	gotoxy(20,5);
 	textcolor(10);
 }
 
-void txt(int linha)
+void txt(int &linha)
 {
 	textcolor(15);
 	gotoxy(8,linha);
 	fflush(stdin);
+	linha++;
 }
 
 
@@ -296,194 +287,375 @@ char menu7 ()
 }
 
 /*Buscas*/
-/*
-int BuscaMat(FILE *Ptr,int Mat)
+int busca_forn(FILE *ptr,int cod,struct Fornecedor F)
 {
-	TpFunc R;
-	rewind(Ptr);
-	fread(&R,sizeof(TpFunc),1,Ptr);
-	while (!feof(Ptr) && Mat!=R.Matricula)
-		fread(&R,sizeof(TpFunc),1,Ptr);
+	rewind(ptr);
+	fread(&F,sizeof(F),1,ptr);
+	while (!feof(ptr) && cod!=F.codF)
+		fread(&F,sizeof(F),1,ptr);
 	
-	if (!feof(Ptr))
-		return ftell(Ptr)-sizeof(TpFunc);
+	if (!feof(ptr))
+		return ftell(ptr)-sizeof(F);
 	else
 		return -1;
-}*/
+}
+
+int busca_cpf(FILE *ptr,char aux[35],struct Cliente C) 
+{
+	rewind(ptr);
+	fread(&C,sizeof(C),1,ptr);
+	while (!feof(ptr) && strcmp(C.CPF,aux)!=0)
+		fread(&C,sizeof(C),1,ptr);
 	
-/*	
-void ExcLogicaForn(void) {
-    int pos;
-    struct Fornecedor fornecedor; //fodase coloquei mesmo uma struct aqui porra para testar mano porra 
-    FILE *ptrForn = fopen("fornecedores.dat", "rb+");
-
-    printf("\n### Exclusao Logica de Fornecedor ###\n");
-
-    if (ptrForn == NULL) {
-        printf("\nErro de Abertura!\n");
-    } else {
-        printf("\nCodigo do Fornecedor a excluir: ");
-        scanf("%d", &fornecedor.codF);
-
-        while (fornecedor.codF > 0) {
-            pos = BuscaCodFornecedor(ptrForn, fornecedor.codF);
-
-            if (pos == -1) {
-                printf("Codigo nao encontrado!\n");
-            } else {
-                fseek(ptrForn, pos, 0);
-                fread(&fornecedor, sizeof(struct Fornecedor), 1, ptrForn);
-
-                printf("\n*** Detalhes do Registro ***\n");
-                printf("Codigo Fornecedor: %d\n", fornecedor.codF);
-                printf("Nome Fornecedor: %s\n", fornecedor.nomeF);
-                printf("Cidade Fornecedor: %s\n", fornecedor.Cidade);
-
-                printf("\nConfirma Exclusao Logica (S/N)? ");
-                if (toupper(getchar()) == 'S') {
-                    printf("\nNovo Codigo Fornecedor: ");
-                    scanf("%d", &fornecedor.codF);
-                    printf("\nNovo Nome Fornecedor: ");
-                    scanf("%s", fornecedor.nomeF);
-                    printf("\nCidade Fornecedor: ");
-                    scanf("%s", fornecedor.Cidade);
-                    fornecedor.status = false;
-
-                    fseek(ptrForn, pos, 0);
-                    fwrite(&fornecedor, sizeof(struct Fornecedor), 1, ptrForn);
-                    printf("\nRegistro atualizado!!\n");
-                }
-            }
-
-            printf("\nCodigo do Fornecedor a excluir: ");
-            scanf("%d", &fornecedor.codF);
-        }
-
-        fclose(ptrForn);
-    }
-}
-*/
-
-
-
-// fazer aqui uma BuscaCodFornecedor(FILE *ptrForn, int codF)
-
-
-
-/*
-void ExclFisica(void){
-	int pos, Mat;
-	char op;
-	TpFunc Reg;
-	FILE *PtrFunc = fopen("func.dat","rb");
-	printf("\n### Exclusao Fisica de Funcionarios ###\n");
-	if (PtrFunc == NULL)
-		printf("\nErro de Abertura!\n");
+	if (!feof(ptr))
+		return ftell(ptr)-sizeof(C);
 	else
-		{
-			printf("\nMatricula do Funcionario a excluir: ");
-			scanf("%d",&Mat);
-			if (Mat>0)
-			{
-				pos = BuscaMat(PtrFunc,Mat);
-				
-				if (pos==-1)
-					printf("\nMatricula nao encontrada!\n");
-				else
-					{   
-						fseek(PtrFunc,pos,0);
-						fread(&Reg,sizeof(TpFunc),1,PtrFunc);
-						printf("\n*** Detalhes do Registro ***\n");
-						printf("Matricula: %d\n",Reg.Matricula);
-						printf("Nome: %s\n",Reg.Nome);
-						printf("Salario: R$ %.f\n",Reg.Salario);
-						
-						printf("\nConfirma exclusao (S/N)? ");
-						op = toupper(getche());
-						if (op=='S')
-						{
-							FILE *PtrTemp = fopen("Temp.dat", "wb");
-							rewind(PtrFunc);
-							fread(&Reg,sizeof(TpFunc),1,PtrFunc);
-							while(!feof(PtrFunc)){
-								if(Reg.Matricula != Mat)
-									fwrite(&Reg,sizeof(TpFunc),1,PtrTemp);
-									
-							}
-							fclose(PtrFunc);
-							fclose(PtrTemp);
-							remove("Func.dat");
-							rename("Temp.dat","Func.dat");
-							
-							printf("\nRegistro deletado!!\n");
-						}
-						else
-							fclose(PtrFunc);
-					}
-				getch();
-								
-			}
-		}
+		return -1;
 }
-*/
 
+/*InserÃ§Ãµes*/
+/*ALTERAR A INSERÃ‡ÃƒO DIRETA PARA ESQUERDA > DIREITA */
+void alfa_e_beta(FILE* ptr,struct Cliente C,char nome[35])
+{
+	rewind(ptr);
+	fread(&C, sizeof(C), 1, ptr);
+	
+	while (!feof(ptr) && strcmp(nome, C.nomeC) > 0) 
+		fread(&C, sizeof(C), 1, ptr);
+    
+
+    fseek(ptr, -sizeof(C), SEEK_CUR);
+
+    fwrite(&C, sizeof(C), 1, ptr);
+}
+
+/*ValidaÃ§Ã£o de CPF*/
+void formata_cpf(char CPF[35])
+{
+	char cpfFormatado[15];
+	int i,j;
+	
+	for (i=0,j=0; i < strlen(CPF) - 2; i++) 
+	{
+        if (i == 3 || i == 6) 
+            cpfFormatado[j++] = '.';
+        
+        	cpfFormatado[j++] = CPF[i];
+    }
+
+    cpfFormatado[j++] = '-';
+    
+    for (i = strlen(CPF) - 2; i < strlen(CPF); i++, j++) 
+        cpfFormatado[j] = CPF[i];
+
+	strcpy(CPF, cpfFormatado);
+}
+
+int verifica_cpf(char* aux) 
+{
+    int cpf[11],i,soma=0,resto;
+
+    for (i = 0; i < 11; i++) 
+        cpf[i] = aux[i] - '0';
+    
+    for (i = 0; i < 9; i++) 
+        soma += cpf[i] * (10 - i);
+    
+    resto = soma % 11;
+    
+    int digito1 = (resto < 2) ? 0 : (11 - resto);
+
+    if (cpf[9] != digito1) 
+        return -1;  
+        
+    soma = 0;
+    for (i = 0; i < 10; i++) 
+        soma += cpf[i] * (11 - i);
+    
+    resto = soma % 11;
+    
+    int digito2 = (resto < 2) ? 0 : (11 - resto);
+
+    if (cpf[10] != digito2) 
+    	return -1;  
+    else    
+   	 	return 1; 
+}
+
+int valida_cpf(char aux[35])
+{
+	int ok;
+	
+	if (strlen(aux) != 11) 
+        return -1;
+    
+    for (int i = 0; i < strlen(aux); i++) 
+		if (aux[i] < '0' || aux[i] > '9') 
+            return -1;  
+	
+	ok=verifica_cpf(aux);
+	
+	if(ok==1)
+    	return 1;
+    else
+    	return -1;
+}
+
+	
+/*ExibiÃ§Ãµes dos cadastros e vendas*/
+void visu_forn() 
+{
+    int linhaC = 11,larguraMaxima = 20; 
+    struct Fornecedor F;
+
+    FILE *frn = fopen("C://VendasATP2//cadastros//fornecedores.dat","rb");
+	if(frn==NULL)
+	{
+		msg();
+		printf("--[ARQUIVO INVALIDO]--");
+		getch();	
+		exit(1);
+	}
+    
+    else 
+	{
+		fread(&F,sizeof(F),1,frn);
+		while(!feof(frn))
+        {
+        	if(F.status!=true)
+	        {
+		        txt(linhaC);
+		        printf("Codigo: %d", F.codF);
+		        txt(linhaC);
+		        printf("Nome: %-*s", larguraMaxima, F.nomeF);
+				txt(linhaC);
+		        printf("Cidade: %-*s", larguraMaxima, F.Cidade);
+		        linhaC += 2;  
+	
+				if (linhaC >= 23) 
+				{
+		            getch();
+		            limpartela(linhaC);
+		        }
+	    	}
+	        
+	        fread(&F,sizeof(F),1,frn);
+	        
+    	}
+    	
+    	getch();
+    	fclose(frn);
+    	
+    }
+    
+    limpartelaanyway();
+}	
+
+void visu_prod()
+{
+	
+}
+	
+void visu_cli()
+{
+	int linhaC = 11,larguraMaxima = 20; 
+    struct Cliente C;
+
+  	FILE *cli = fopen("C://VendasATP2//cadastros//clientes.dat","rb");
+	if(cli==NULL)
+	{
+		msg();
+		printf("--[ARQUIVO INVALIDO]--");
+		getch();	
+		exit(1);
+	}
+    
+    else 
+	{
+		fread(&C,sizeof(C),1,cli);
+		while(!feof(cli))
+        {
+        	if(C.status!=true)
+	        {
+		        txt(linhaC);
+		        printf("CPF: %s", C.CPF);
+		        txt(linhaC);
+		        printf("Nome: %-*s", larguraMaxima, C.nomeC);
+				txt(linhaC);
+		        printf("Compras: %d", C.qtdC);
+		        txt(linhaC);
+		        printf("Compras: %.2f", C.valor);
+		        linhaC += 2;  
+	
+				if (linhaC >= 23) 
+				{
+		            getch();
+		            limpartela(linhaC);
+		        }
+	    	}
+	        
+	        fread(&C,sizeof(C),1,cli);
+	        
+    	}
+    	
+    	getch();
+    	fclose(cli);
+    	
+    }
+    
+    limpartelaanyway();
+	
+}	
+	
 /*Cadastros*/
 void cad_forn()
 {
 	struct Fornecedor F;
-	int linhaC=11,qtd,aux;
+	int linhaC=11,aux,existe;
 	
-	msg();
-	printf("Quantos fornecedores deseja cadastrar?");
-	txt(linhaC);
-	scanf("%d",&qtd);
-	linhaC++;
-	if(qtd<=0)
-	return;
-	else
+	FILE *frn = fopen("C://VendasATP2//cadastros//fornecedores.dat","ab+");
+	if(frn==NULL)
 	{
-		FILE *frn = fopen("fornecedores.dat","ab+");
-		if(frn==NULL)
+		msg();
+		printf("--[ARQUIVO INVALIDO]--");
+		getch();	
+		exit(1);
+	}
+	else
 		{
 			msg();
-			printf("--[ARQUIVO INVALIDO]--");
-			getch();	
-			exit(1);
-		}
-		else
-		{
-			for(int i=0;i<qtd;i++)
+			printf("Digite o codigo do fornecedor/0 Encerra");
+			txt(linhaC);
+			scanf("%d",&aux);
+				
+			while(aux>0)
 			{
-				msg();
-				printf("Digite o codigo do fornecedor: ");
-				txt(linhaC);
-				scanf("%d",&aux);
-				linhaC++;
-				if(cod<=0)
+				existe = busca_forn(frn,aux,F);
+				if(existe==-1)
+				{
+					F.codF = aux;
+					msg();
+					printf("Digite o nome do fornecedor:");
+					txt(linhaC);
+					gets(F.nomeF);
+					msg();
+					printf("Digite a cidade do fornecedor:");
+					txt(linhaC);
+					gets(F.Cidade);
+					limpartela(linhaC);
+					
+					F.status = false;
+					F.qtd++;
+					
+					fwrite(&F,sizeof(F),1,frn);
+				
+					msg();
+					printf("Digite o codigo do fornecedor/0 Encerra");
+					txt(linhaC);
+					scanf("%d",&aux);
+				}
+				else if(existe!=-1)
 				{
 					msg();
-					printf("***Codigo Invalido!***");
-					getch();	
+					printf("Fornecedor ja cadastrado");
+					getch();
 					return;
 				}
-				else
-				{
-					fwrite(&F,sizeof(F),1,FILE*ptr); 
-					
-					status = true;
-				}
-				printf("Digite o nome do fornecedor: ");
-				printf("Digite a cidade do fornecedor: ");
+			
 			}
+			
+			fclose(frn);
+			
+			msg();
+			printf("--[Cadastro Finalizado]--");
+			getch();
 		}
-	}
-	msg();
-	printf("**Cadastro Finalizado**");
+		
+  	limpartelaanyway();		
+}
+
+void cad_cli()
+{
+	struct Cliente C;
+	int linhaC=11,valido;
+	char aux[35];
 	
+	FILE *cli = fopen("C://VendasATP2//cadastros//clientes.dat","ab+");
+	
+	if(cli==NULL)
+	{
+		msg();
+		printf("--[ARQUIVO INVALIDO]--");
+		getch();	
+		exit(1);
+	}
+	
+	else
+	{
+		msg();
+		printf("Digite o CPF do cliente/0 Encerra");
+		txt(linhaC);
+		fflush(stdin);
+		gets(aux);
+		
+		while(aux[0]!='0')
+		{
+			valido=valida_cpf(aux);
+			
+			if(valido==-1)
+			{
+				msg();
+				printf("CPF invalido!");
+				getch();
+				return;
+			}
+			
+			formata_cpf(aux);
+			
+			valido=busca_cpf(cli,aux,C);
+			
+			if(valido==-1)
+			{
+				strcpy(C.CPF,aux);
+				msg();
+				printf("Digite o nome do cliente");
+				txt(linhaC);
+				fflush(stdin);
+				gets(aux);
+				alfa_e_beta(cli,C,aux);
+				strcpy(C.nomeC,aux);
+				limpartela(linhaC);
+				C.qtdC=0,C.valor=0,C.qtd++;
+				C.status = false;
+			}
+			else
+			{
+				msg();
+				printf("CPF cadastrado!");
+				getch();
+				return;	
+			}
+			
+			fwrite(&C,sizeof(C),1,cli);
+			
+				msg();
+				printf("Digite o CPF do cliente/0 Encerra");
+				txt(linhaC);
+				fflush(stdin);
+				gets(aux);
+			
+		}
+		
+		fclose(cli);
+			
+		msg();
+		printf("--[Cadastro Finalizado]--");
+		getch();
+	}
+	limpartelaanyway();	
 }
 
 /*Borda*/
-
 void borda (int CI, int LI, int CF, int LF, int cor)
 {
 	int i;
@@ -524,21 +696,15 @@ void msgEstatica ()
 	printf("***MENU***");
 }
 
-void Executar ()
+void executar ()
 {
 	char op,opR;
-	struct Fornecedor F;
-	struct Produtos P;
-	struct Cliente C;
-	struct Datav DTV;
-	struct Vendas V;
-	struct VendasProd VP;
 	
 	do
 	
 	{
 		limparMsg();
-		limparTelaAnyway();
+		limpartelaanyway();
 		op=menu();
 		
 		switch(op)
@@ -546,19 +712,19 @@ void Executar ()
 			case 'A': textcolor(15);
 			gotoxy(14,9);
 			printf("Cadastro do Fornecedor.");
-			cad_forn(F);
+			cad_forn();
 			break;
 			/*
 			case 'B':textcolor(15);
 			gotoxy(14,9);
 			printf("Cadastro do Produto.");
 			cad_Produtos();
-			break;
+			break;*/
 			
 			case 'C':textcolor(15);
 			gotoxy(14,9);
 			printf("Cadastro do Cliente.");
-			cad_Cliente();
+			cad_cli();
 			break;
 			
 			case 'D':textcolor(15);
@@ -568,15 +734,16 @@ void Executar ()
 			opR=menu2();
 			
 				if(opR=='1')
-					VisuForn();
+					visu_forn();
 				
 				else if(opR=='2')
-					VisuProd();
+					visu_prod();
 				
 				else if(opR=='3')
-					VisuCli();			
+					visu_cli();			
 				break;
 			 
+			/* 
 			case 'E':textcolor(15);
 			gotoxy(14,9);
 			printf("Venda de produtos.");
@@ -655,7 +822,7 @@ int main (void)
 	
 	
 	/*
-	MENSAGENS PARA O USUÁRIO DEVEM
+	MENSAGENS PARA O USUÃRIO DEVEM
 	ESTAR ENTRE:
 	CI 4 a 33 / 48 a 78
 	LI 4 
@@ -679,7 +846,7 @@ int main (void)
 	CI=50,LI=8,CF=78,LF=24;
 	borda(CI,LI,CF,LF,cor);
 	
-	//BORDA CÓDIGO
+	//BORDA CÃ“DIGO
 	
 	cor=15;
 	CI=2,LI=8,CF=49,LF=24;
@@ -689,10 +856,9 @@ int main (void)
 	
 	msgEstatica();
 	
-	Executar();
+	executar();
 	
 	printf("\n\n\n\n\n\n\n\n\n\n\n");
 		
 	return 0;
 } 
-
