@@ -14,14 +14,14 @@
 
 	struct Fornecedor
 	{
-		int codF,qtd=0;
+		int codF;
 		char nomeF[35],Cidade[35];;
 		bool status;	
 	};
 	
 	struct Produtos
 	{
-		int codP,Estoque,codF,qtd=0;
+		int codP,Estoque,codF;
 		char nomeP[35];	
 		float preco;
 		struct Datav DTV;
@@ -32,7 +32,7 @@
 	{
 		char CPF[15];
 		char nomeC[35];
-		int qtdC=0,qtd=0;
+		int qtdC;
 		bool status;
 		float valor;	
 	};
@@ -287,27 +287,6 @@ char menu7 ()
 }
 
 /*Buscas*/
-int busca_maior(FILE *ptr) 
-{
-    int maior_cod = 0;
-    struct Fornecedor F;
-
-    rewind(ptr);
-
-    // Lê cada registro do arquivo
-    while (fread(&F, sizeof(struct Fornecedor), 1, ptr) == 1) 
-	{
-        if (F.codF > maior_cod) 
-		{
-            maior_cod = F.codF;
-        }
-    }
-
-    // Retorna o maior código encontrado
-    return maior_cod;
-}
-
-
 int busca_forn(FILE *ptr,int cod,struct Fornecedor F)
 {
 	rewind(ptr);
@@ -337,17 +316,40 @@ int busca_cpf(FILE *ptr,char aux[35],struct Cliente C)
 /*Inserções e ordenações*/
 void sel_dir()
 {
-	struct Fornecedor F;
-    int cod_maior;
-    
-    FILE *frn = fopen("C://VendasATP2//cadastros//fornecedores.dat","rb+");
-    
-    cod_maior=busca_maior(frn);
-    msg();
-    printf("%d",&cod_maior);
-    getch();
-    
-    fclose(frn);
+	struct Fornecedor FA,FB;
+    int pos_maior,qtdreg,maior=0;
+	
+	FILE *frn = fopen("C://VendasATP2//cadastros//fornecedores.dat","rb+");
+	
+	fseek(frn,0,SEEK_END);
+	qtdreg = ftell(frn)/sizeof(Fornecedor);
+	
+	while(qtdreg>0)
+	{
+		rewind(frn);
+		
+			for(int j=0;j<qtdreg;j++)
+			{
+				if(FA.codF>maior)
+					maior=FA.codF;
+				fread(&FA,sizeof(Fornecedor),1,frn);
+			}
+			
+			pos_maior = busca_forn(frn,maior,FA);
+			
+			if(pos_maior/sizeof(Fornecedor)<qtdreg)
+			{
+				fseek(frn,qtdreg*sizeof(Fornecedor),0);
+				fwrite(&FB,sizeof(Fornecedor),1,frn); //última posição
+						
+				fseek(frn,pos_maior,0);
+				fwrite(&FA,sizeof(Fornecedor),1,frn); //posição com maior cod
+			}
+			
+		qtdreg--;	
+	}
+		
+	fclose(frn);
 }
 
 void bubble_cli() 
@@ -598,7 +600,6 @@ void cad_forn()
 					limpartela(linhaC);
 					
 					F.status = false;
-					F.qtd++;
 					
 					fwrite(&F,sizeof(F),1,frn);
 				
@@ -675,7 +676,7 @@ void cad_cli()
 				fflush(stdin);
 				gets(C.nomeC);
 				limpartela(linhaC);
-				C.qtdC=0,C.valor=0,C.qtd++,C.status = false;
+				C.qtdC=0,C.valor=0,C.status = false;
 				strcpy(C.CPF,aux);
 			}
 			else
