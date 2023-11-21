@@ -5,7 +5,7 @@
 #include<stdlib.h>
 #include<conio2.h>
 
-/*Declara√ß√£o das structs*/
+/*DeclaraÁ„o das structs*/
 	struct Datav 
 	{
     	int dia,mes,ano;
@@ -52,7 +52,7 @@
 		float valorU;	
 	};
 	
-/*Fun√ß√µes de limpeza*/
+/*FunÁıes de limpeza*/
 void limparMenu ()
 {
 	int c,l;
@@ -287,6 +287,27 @@ char menu7 ()
 }
 
 /*Buscas*/
+int busca_maior(FILE *ptr) 
+{
+    int maior_cod = 0;
+    struct Fornecedor F;
+
+    rewind(ptr);
+
+    // LÍ cada registro do arquivo
+    while (fread(&F, sizeof(struct Fornecedor), 1, ptr) == 1) 
+	{
+        if (F.codF > maior_cod) 
+		{
+            maior_cod = F.codF;
+        }
+    }
+
+    // Retorna o maior cÛdigo encontrado
+    return maior_cod;
+}
+
+
 int busca_forn(FILE *ptr,int cod,struct Fornecedor F)
 {
 	rewind(ptr);
@@ -313,23 +334,55 @@ int busca_cpf(FILE *ptr,char aux[35],struct Cliente C)
 		return -1;
 }
 
-/*Inser√ß√µes*/
-/*ALTERAR A INSER√á√ÉO DIRETA PARA ESQUERDA > DIREITA */
-void alfa_e_beta(FILE* ptr,struct Cliente C,char nome[35])
+/*InserÁıes e ordenaÁıes*/
+void sel_dir()
 {
-	rewind(ptr);
-	fread(&C, sizeof(C), 1, ptr);
-	
-	while (!feof(ptr) && strcmp(nome, C.nomeC) > 0) 
-		fread(&C, sizeof(C), 1, ptr);
+	struct Fornecedor F;
+    int cod_maior;
     
-
-    fseek(ptr, -sizeof(C), SEEK_CUR);
-
-    fwrite(&C, sizeof(C), 1, ptr);
+    FILE *frn = fopen("C://VendasATP2//cadastros//fornecedores.dat","rb+");
+    
+    cod_maior=busca_maior(frn);
+    msg();
+    printf("%d",&cod_maior);
+    getch();
+    
+    fclose(frn);
 }
 
-/*Valida√ß√£o de CPF*/
+void bubble_cli() 
+{
+    struct Cliente atual, proximo;
+    int qtdreg;
+    
+    FILE *cli = fopen("C://VendasATP2//cadastros//clientes.dat","rb+");
+
+	fseek(cli,0,SEEK_END);
+	qtdreg = ftell(cli)/sizeof(Cliente);
+	
+	for(int a=0;a<qtdreg;a++)
+		for(int b=0;b<qtdreg;b++)
+		{
+			fseek(cli,a*sizeof(Cliente),0);
+			fread(&atual,sizeof(Cliente),1,cli);
+			
+			fseek(cli,b*sizeof(Cliente),0);
+			fread(&proximo,sizeof(Cliente),1,cli);
+		
+		  if (stricmp(atual.nomeC, proximo.nomeC) < 0)
+		   {
+              	fseek(cli,a*sizeof(Cliente),0);
+				fwrite(&proximo,sizeof(Cliente),1,cli);
+						
+				fseek(cli,b*sizeof(Cliente),0);
+				fwrite(&atual,sizeof(Cliente),1,cli);
+           }
+		}
+		
+	fclose(cli);
+}
+
+/*ValidaÁ„o de CPF*/
 void formata_cpf(char CPF[35])
 {
 	char cpfFormatado[15];
@@ -402,7 +455,7 @@ int valida_cpf(char aux[35])
 }
 
 	
-/*Exibi√ß√µes dos cadastros e vendas*/
+/*ExibiÁıes dos cadastros e vendas*/
 void visu_forn() 
 {
     int linhaC = 11,larguraMaxima = 20; 
@@ -576,7 +629,7 @@ void cad_forn()
 
 void cad_cli()
 {
-	struct Cliente C;
+	struct Cliente C; 
 	int linhaC=11,valido;
 	char aux[35];
 	
@@ -612,21 +665,18 @@ void cad_cli()
 			
 			formata_cpf(aux);
 			
-			valido=busca_cpf(cli,aux,C);
+			valido=busca_cpf(cli,aux,C);  
 			
 			if(valido==-1)
 			{
-				strcpy(C.CPF,aux);
 				msg();
 				printf("Digite o nome do cliente");
 				txt(linhaC);
 				fflush(stdin);
-				gets(aux);
-				alfa_e_beta(cli,C,aux);
-				strcpy(C.nomeC,aux);
+				gets(C.nomeC);
 				limpartela(linhaC);
-				C.qtdC=0,C.valor=0,C.qtd++;
-				C.status = false;
+				C.qtdC=0,C.valor=0,C.qtd++,C.status = false;
+				strcpy(C.CPF,aux);
 			}
 			else
 			{
@@ -713,6 +763,7 @@ void executar ()
 			gotoxy(14,9);
 			printf("Cadastro do Fornecedor.");
 			cad_forn();
+			sel_dir();
 			break;
 			/*
 			case 'B':textcolor(15);
@@ -725,6 +776,7 @@ void executar ()
 			gotoxy(14,9);
 			printf("Cadastro do Cliente.");
 			cad_cli();
+			bubble_cli();
 			break;
 			
 			case 'D':textcolor(15);
@@ -822,7 +874,7 @@ int main (void)
 	
 	
 	/*
-	MENSAGENS PARA O USU√ÅRIO DEVEM
+	MENSAGENS PARA O USU¡RIO DEVEM
 	ESTAR ENTRE:
 	CI 4 a 33 / 48 a 78
 	LI 4 
@@ -846,7 +898,7 @@ int main (void)
 	CI=50,LI=8,CF=78,LF=24;
 	borda(CI,LI,CF,LF,cor);
 	
-	//BORDA C√ìDIGO
+	//BORDA C”DIGO
 	
 	cor=15;
 	CI=2,LI=8,CF=49,LF=24;
@@ -862,3 +914,4 @@ int main (void)
 		
 	return 0;
 } 
+
